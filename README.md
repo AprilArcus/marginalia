@@ -30,3 +30,16 @@ npm install react reactify
 /marginalia/src/js/dispatchers/
 /marginalia/src/js/constants/
 ```
+
+16 Jan 2015
+-----------
+
+* Improving build system by migrating from gulp-browserify to real gulp
+  commands
+* These resources have been helpful:
+  * https://medium.com/@sogko/gulp-browserify-the-gulp-y-way-bb359b3f9623
+  * https://github.com/gulpjs/gulp/blob/master/docs/recipes/fast-browserify-builds-with-watchify.md
+  * http://blog.avisi.nl/2014/04/25/how-to-keep-a-fast-build-with-browserify-and-reactjs/
+  * http://truongtx.me/2014/08/06/using-watchify-with-gulp-for-fast-browserify-build/
+  * https://hacks.mozilla.org/2014/08/browserify-and-gulp-with-react/
+  * http://christianalfoni.github.io/javascript/2014/08/15/react-js-workflow.html
