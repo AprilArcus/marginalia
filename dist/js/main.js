@@ -2,25 +2,23 @@
 /** @jsx React.DOM */
 var React = require('react');
 
-var APP = React.createClass({displayName: "APP",
+module.exports = React.createClass({displayName: "exports",
     render: function() {
         return React.createElement("h1", null, "Get fluxy in /js/components/app.js")
     }
 })
 
-module.exports = APP;
-
 },{"react":149}],2:[function(require,module,exports){
 /** @jsx React.DOM */
-var APP = require('./components/app');
+var App = require('./components/app.jsx');
 var React = require('react');
 
 React.renderComponent(
-  React.createElement(APP, null),
+  React.createElement(App, null),
   document.getElementById('main')
 );
 
-},{"./components/app":1,"react":149}],3:[function(require,module,exports){
+},{"./components/app.jsx":1,"react":149}],3:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};

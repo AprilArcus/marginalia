@@ -1,8 +1,8 @@
 /** @jsx React.DOM */
-var APP = require('./components/app');
+var App = require('./components/app.jsx');
 var React = require('react');
 
 React.renderComponent(
-  <APP />,
+  <App />,
   document.getElementById('main')
 );

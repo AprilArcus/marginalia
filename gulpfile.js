@@ -13,7 +13,7 @@ var concat = require('gulp-concat');
 // "Okay, we're going to set up our first gulp task, and this is going
 //  to be our browserify task."
 gulp.task('browserify', function() {
-    gulp.src('src/js/main.js')
+    gulp.src('src/js/main.jsx')
      // "We're going to tap into our reactify library, and that's going
      //  to convert all our JSX into Javascript."
         .pipe(browserify({transform: 'reactify'}))
@@ -42,5 +42,5 @@ gulp.task('default', ['browserify', 'copy']);
 //  it'll run the default task."
 
 gulp.task('watch', function() {
-    gulp.watch('src/**/*.*', ['default']); // ignoring src/index.html ?
+    gulp.watch('src/**/*.*', ['default']);
 });
