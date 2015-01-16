@@ -4,7 +4,7 @@ Experiments with React & Gulp
 15 Jan 2015
 -----------
 
-* Set up development environment in gulp with help of @joemaddalone's
+* Set up development environment in gulp with help of @joemaddalone 's
   [screencast][joemaddalone1].
 
 [joemaddalone1]: https://egghead.io/lessons/react-development-environment-setup
