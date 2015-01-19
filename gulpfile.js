@@ -9,7 +9,7 @@
 var package_json = require('./package.json');
 
 var gulp = require('gulp');
-var gutil = require('gulp-util');
+var util = require('gulp-util');
 var source = require('vinyl-source-stream');
 var buffer = require('vinyl-buffer');
 // var transform = require('vinyl-transform');
@@ -20,36 +20,48 @@ var buffer = require('vinyl-buffer');
 var sourcemaps = require('gulp-sourcemaps');
 var watchify = require('watchify');
 var browserify = require('browserify');
+var notify = require('gulp-notify');
 var reactify = require('reactify');
+var envify = require('envify');
+var uglifyify = require('uglifyify');
+
 var production = process.env.NODE_ENV === 'production';
 
-var scripts = function(options) {
+function handleError(task) {
+  return function(err) {
+    util.log(util.colors.red(err));
+    notify.onError(task + ' failed, check the logs..')(err);
+  };
+}
+
+var scripts = function(watch) {
     var bundler = browserify('./src/js/main.jsx', {
         basedir: __dirname,
         debug: !production,
         cache: {}, // required for watchify
         packageCache: {}, // required for watchify
-        fullPaths: options.watch // required to be true only for watchify
+        fullPaths: watch // required to be true only for watchify
     });
-    if (options.watch) {
+    if (watch) {
         bundler = watchify(bundler);
     }
     bundler.transform(reactify);
+    // bundler.transform(envify, {global: true});
+    // if (producton) {
+    if (true) {
+        bundler.transform({global: true}, uglifyify);
+    }
 
     var rebundle = function() {
-        return bundler.bundle()
-// Fast browserify builds with watchify                      
-// https://github.com/gulpjs/gulp/blob/master/docs/recipes/fast-browserify-builds-with-watchify.md
-                    // log errors if they happen
-                      .on('error', gutil.log.bind(gutil, 'Browserify Error'))
-                      .pipe(source('main.js'))
-                    // optional, remove if you dont want sourcemaps
-                      .pipe(buffer())
-                    // loads map from browserify file
-                      .pipe(sourcemaps.init({loadMaps: true}))
-                    // writes .map file
-                      .pipe(sourcemaps.write('./'))
-                      .pipe(gulp.dest('./dist/js'));
+        var stream = bundler.bundle();
+        stream.on('error', handleError('Browserify'));
+        return stream.pipe(source('bundle.js'))
+        // optional, remove if you dont want sourcemaps
+                     .pipe(buffer())
+                     .pipe(sourcemaps.init({loadMaps: true})) // loads map from browserify file
+                     .pipe(sourcemaps.write('./')) // writes .map file
+        // https://github.com/gulpjs/gulp/blob/master/docs/recipes/fast-browserify-builds-with-watchify.md
+                     .pipe(gulp.dest('./build/js'));
     };
 
     bundler.on('update', rebundle);
@@ -57,30 +69,12 @@ var scripts = function(options) {
 }
 
 gulp.task('scripts', function() {
-    return scripts( {watch: false} );
+    return scripts(false);
 });
 
 gulp.task('watchScripts', function() {
-    return scripts( {watch: true} );
+    return scripts(true);
 });
-
-// https://github.com/gulpjs/gulp/blob/master/docs/recipes/fast-browserify-builds-with-watchify.md
-
-// var bundle = function() {
-//   return bundler.bundle()
-//     // log errors if they happen
-    
-//     .pipe(source('main.js'))
-//     // optional, remove if you dont want sourcemaps
-//     .pipe(buffer())
-//     .pipe(sourcemaps.init({loadMaps: true})) // loads map from browserify file
-//     .pipe(sourcemaps.write('./')) // writes .map file
-//     //
-//     .pipe(gulp.dest('./dist/js'));
-// }
-
-// gulp.task('js', bundle); // so you can run `gulp js` to build the file
-// bundler.on('update', bundle); // on any dep update, runs the bundler
 
 // "We just need to copy that index.html over to the `dist` directory.
 //  There's plugins to do what I'm about to do, but this will work
@@ -88,7 +82,7 @@ gulp.task('watchScripts', function() {
 
 gulp.task('index', function() {
     gulp.src('src/index.html')
-        .pipe(gulp.dest('dist'));
+        .pipe(gulp.dest('build'));
 });
 
 // "we're going to create our default task, which is just going to run

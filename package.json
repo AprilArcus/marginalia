@@ -3,7 +3,10 @@
   "version": "0.0.1",
   "description": "experiments with react.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build:scripts": "browserify src/js/main.jsx --transform [ reactify --es6 --target es5 ] --global-transform uglifyify --debug | exorcist build/bundle.js.map > build/bundle.js",
+    "watch:scripts": "watchify src/js/main.jsx --transform [ reactify --es6 --target es5 ] --global-transform uglifyify --debug -v --outfile tmp/bundle.js.tmp",
+    "extract": "< tmp/bundle.js.tmp exorcist build/bundle.js.map > build/bundle.js"
   },
   "repository": {
     "type": "git",
@@ -27,7 +30,11 @@
     "watchify": "~2.2.1",
     "vinyl-source-stream": "^1.0.0",
     "vinyl-buffer": "^1.0.0",
-    "vinyl-transform": "^1.0.0"
+    "vinyl-transform": "^1.0.0",
+    "envify": "^3.2.0",
+    "uglifyify": "^3.0.1",
+    "gulp-notify": "^2.1.0",
+    "exorcist": "0.1.6"
   },
   "engine": "node 0.10.35"
 }
