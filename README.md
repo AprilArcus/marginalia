@@ -1,5 +1,5 @@
-Experiments with React & Gulp
-=============================
+Experiments with React & ~~Gulp~~
+=================================
 
 15 Jan 2015
 -----------
@@ -66,3 +66,46 @@ What do I really need my build system to do?
 * browserify
 * watchify? gulp.watch?
 * livereload
+
+19 Jan 2015
+-----------
+
+I've started a minimalist build system in package.json.scripts. It goes
+like this:
+
+*   I store `$npm_package_config_browserify_args` so they can be shared
+    between browserify (`npm run build:scripts`) and watchify (`npm run
+    watch:scripts`)
+*   `build:scripts:extract-source-map` expects to receive a browserify
+    bundle with a sourcemap via stdin. It relies on @thlorenz's
+    [exorcist](https://github.com/thlorenz/exorcist) package (unstable,
+    currently 0.1.6).
+*   `build:scripts` shells to `build:scripts:browserify` with
+    `--loglevel=silent` so that the bundled JS goes to stdout, and
+    pipes to `build:scripts:extract-source-map` (this is @smikes'
+    [workaround](https://github.com/npm/npm/issues/6710#issuecomment-63105711)
+    for the npm script runner's mutation of stdout)
+*   Watchify can't pipe to exorcist since it has no useful stdout, so I
+    use @substack's [method](https://github.com/substack/watchify/issues/16#issuecomment-67732434)
+    of writing to a tempfile. Since I refer to this path in three
+    different scripts, I store it as
+    `$npm_package_config_bundle_js_tmp_path`.
+*   Empirically, watchify seems to stream its bundle into `.$tempfile`,
+    then `rm $tempfile` and `mv .$tempfile $tempfile`.
+*   `watch:scripts:watch-source-map` relies on @Qard's [onchange](https://github.com/Qard/onchange)
+    package (unstable, currently 0.0.2) to listen for changes to
+    `$tempfile`. It issues two commands:
+    1.  `touch $tempfile;`, to make sure there is something to watch.
+    2.  `onchange $tempfile -- npm run watch:scripts:extract-source-map`
+    3.  `watch:scripts:extract-source-map` then redirects `$tempfile` to
+        stdin and calls `build:scripts:extract-source-map`
+    If I attempt to inline step 3 into 2 here, it breaks -- exorcist
+    will complain that it was handed a file without a source map, and
+    write an empty bundle.js. It seems like some kind of race condition?
+
+So, I'm starting to get a feel for the complexities, at least. This all
+works for the moment, and at least I understand each step fairly
+clearly. The use of onchange to hold together watchify and exorcise
+feels very janky to me. I wonder if it's hearing a subtly wrong file
+system event? I have to say that this all makes gulp's streaming i/o and
+use of watchify's javascript API seem fairly compelling.
