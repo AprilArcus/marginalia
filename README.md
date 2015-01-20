@@ -99,10 +99,12 @@ like this:
     (https://github.com/Qard)'s [onchange]
     (https://github.com/Qard/onchange) package (unstable, currently
     0.0.2) to listen for changes to `$tempfile`. It issues two commands:
+    
     1.  `touch $tempfile;`, to make sure there is something to watch.
     2.  `onchange $tempfile -- npm run watch:scripts:extract-source-map`
     3.  `watch:scripts:extract-source-map` then redirects `$tempfile` to
         stdin and calls `build:scripts:extract-source-map`
+
     If I attempt to inline step 3 into 2 here, it breaks -- exorcist
     will complain that it was handed a file without a source map, and
     write an empty bundle.js. It seems like some kind of race condition?
