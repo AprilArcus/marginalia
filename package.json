@@ -2,11 +2,21 @@
   "name": "marginalia",
   "version": "0.0.1",
   "description": "experiments with react.js",
+  "config": {
+    "browserify_args": "src/js/main.jsx --transform [ reactify --es6 --target es5 ] --global-transform uglifyify --debug",
+    "bundle_js_tmp_path": "tmp/bundle.js.tmp"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build:scripts": "browserify src/js/main.jsx --transform [ reactify --es6 --target es5 ] --global-transform uglifyify --debug | exorcist build/bundle.js.map > build/bundle.js",
-    "watch:scripts": "watchify src/js/main.jsx --transform [ reactify --es6 --target es5 ] --global-transform uglifyify --debug -v --outfile tmp/bundle.js.tmp",
-    "extract": "< tmp/bundle.js.tmp exorcist build/bundle.js.map > build/bundle.js"
+
+    "build:scripts": "npm run build:scripts:browserify --loglevel=silent | npm run build:scripts:extract-source-map",
+    "build:scripts:browserify": "browserify $npm_package_config_browserify_args",
+    "build:scripts:extract-source-map": "exorcist build/bundle.js.map > build/bundle.js",
+
+    "watch:scripts": "npm run watch:scripts:watchify & npm run watch:scripts:watch-source-map",
+    "watch:scripts:watchify": "watchify $npm_package_config_browserify_args -v --outfile $npm_package_config_bundle_js_tmp_path",
+    "watch:scripts:watch-source-map": "touch $npm_package_config_bundle_js_tmp_path; onchange $npm_package_config_bundle_js_tmp_path -- npm run watch:scripts:extract-source-map",
+    "watch:scripts:extract-source-map": "< $npm_package_config_bundle_js_tmp_path npm run build:scripts:extract-source-map"
   },
   "repository": {
     "type": "git",
@@ -22,19 +32,20 @@
     "react": "~0.12.2"
   },
   "devDependencies": {
+    "browserify": "~8.1.1",
+    "watchify": "~2.2.1",
     "reactify": "~0.17.1",
+    "uglifyify": "^3.0.1",
+    "exorcist": "0.1.6",
+    "onchange": "0.0.2",
     "gulp": "~3.8.10",
     "gulp-util": "~3.0.2",
     "gulp-sourcemaps": "~1.3.0",
-    "browserify": "~8.1.1",
-    "watchify": "~2.2.1",
     "vinyl-source-stream": "^1.0.0",
     "vinyl-buffer": "^1.0.0",
     "vinyl-transform": "^1.0.0",
     "envify": "^3.2.0",
-    "uglifyify": "^3.0.1",
-    "gulp-notify": "^2.1.0",
-    "exorcist": "0.1.6"
+    "gulp-notify": "^2.1.0"
   },
   "engine": "node 0.10.35"
 }
