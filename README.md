@@ -77,12 +77,12 @@ like this:
     between browserify (`npm run build:scripts`) and watchify (`npm run
     watch:scripts`)
 *   `build:scripts:extract-source-map` expects to receive a browserify
-    bundle with a sourcemap via stdin. It relies on @thlorenz's
+    bundle with a sourcemap via stdin. It relies on @thlorenz 's
     [exorcist](https://github.com/thlorenz/exorcist) package (unstable,
     currently 0.1.6).
 *   `build:scripts` shells to `build:scripts:browserify` with
     `--loglevel=silent` so that the bundled JS goes to stdout, and
-    pipes to `build:scripts:extract-source-map` (this is @smikes'
+    pipes to `build:scripts:extract-source-map` (this is @smikes '
     [workaround](https://github.com/npm/npm/issues/6710#issuecomment-63105711)
     for the npm script runner's mutation of stdout)
 *   Watchify can't pipe to exorcist since it has no useful stdout, so I
@@ -92,9 +92,9 @@ like this:
     `$npm_package_config_bundle_js_tmp_path`.
 *   Empirically, watchify seems to stream its bundle into `.$tempfile`,
     then `rm $tempfile` and `mv .$tempfile $tempfile`.
-*   `watch:scripts:watch-source-map` relies on @Qard's [onchange](https://github.com/Qard/onchange)
-    package (unstable, currently 0.0.2) to listen for changes to
-    `$tempfile`. It issues two commands:
+*   `watch:scripts:watch-source-map` relies on @Qard 's [onchange]
+    (https://github.com/Qard/onchange) package (unstable, currently
+    0.0.2) to listen for changes to `$tempfile`. It issues two commands:
     1.  `touch $tempfile;`, to make sure there is something to watch.
     2.  `onchange $tempfile -- npm run watch:scripts:extract-source-map`
     3.  `watch:scripts:extract-source-map` then redirects `$tempfile` to
