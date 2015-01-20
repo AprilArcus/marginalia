@@ -8,11 +8,9 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-
     "build:scripts": "npm run build:scripts:browserify --loglevel=silent | npm run build:scripts:extract-source-map",
     "build:scripts:browserify": "browserify $npm_package_config_browserify_args",
     "build:scripts:extract-source-map": "exorcist build/bundle.js.map > build/bundle.js",
-
     "watch:scripts": "npm run watch:scripts:watchify & npm run watch:scripts:watch-source-map",
     "watch:scripts:watchify": "watchify $npm_package_config_browserify_args -v --outfile $npm_package_config_bundle_js_tmp_path",
     "watch:scripts:watch-source-map": "touch $npm_package_config_bundle_js_tmp_path; onchange $npm_package_config_bundle_js_tmp_path -- npm run watch:scripts:extract-source-map",
@@ -32,19 +30,21 @@
     "react": "latest"
   },
   "devDependencies": {
-    "gulp": "^3.8.10",
-    "vinyl-source-stream": "^1.0.0",
-    "vinyl-buffer": "^1.0.0",
-    "gulp-util": "^3.0.2",
-    "gulp-notify": "^2.1.0",
-    "browserify": "^8.1.1",
-    "watchify": "^2.2.1",
-    "envify": "^3.2.0",
-    "reactify": "latest",
-    "uglifyify": "^3.0.1",
-    "gulp-sourcemaps": "^1.3.0",
     "6to5ify": "^3.1.2",
-    "lodash": "^2.4.1"
+    "browserify": "^8.1.1",
+    "del": "^1.1.1",
+    "envify": "^3.2.0",
+    "gulp": "^3.8.10",
+    "gulp-notify": "^2.1.0",
+    "gulp-sourcemaps": "^1.3.0",
+    "gulp-util": "^3.0.2",
+    "lodash": "^2.4.1",
+    "reactify": "latest",
+    "rimraf": "^2.2.8",
+    "uglifyify": "^3.0.1",
+    "vinyl-buffer": "^1.0.0",
+    "vinyl-source-stream": "^1.0.0",
+    "watchify": "^2.2.1"
   },
   "engine": "node 0.10.35"
 }
