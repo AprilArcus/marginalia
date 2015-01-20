@@ -1,5 +1,5 @@
-Experiments with React & ~~Gulp~~
-=================================
+Experiments with React & Gulp
+=============================
 
 15 Jan 2015
 -----------
@@ -77,7 +77,7 @@ like this:
     between browserify (`npm run build:scripts`) and watchify (`npm run
     watch:scripts`)
 *   `build:scripts:extract-source-map` expects to receive a browserify
-    bundle with a sourcemap via stdin. It relies on [Thorsten Lorenz]
+    bundle with a sourcemap via stdin. It relies on [thlorenz]
     (https://github.com/thlorenz)'s [exorcist]
     (https://github.com/thlorenz/exorcist) package (unstable, currently
     0.1.6).
@@ -88,18 +88,18 @@ like this:
     [workaround](https://github.com/npm/npm/issues/6710#issuecomment-63105711)
     for the npm script runner's mutation of stdout)
 *   Watchify can't pipe to exorcist since it has no useful stdout, so I
-    use [James Halliday](https://github.com/substack/)'s [method]
+    use [substack](https://github.com/substack/)'s [method]
     (https://github.com/substack/watchify/issues/16#issuecomment-67732434)
     of writing to a tempfile. Since I refer to this path in three
     different scripts, I store it as
     `$npm_package_config_bundle_js_tmp_path`.
 *   Empirically, watchify seems to stream its bundle into `.$tempfile`,
     then `rm $tempfile` and `mv .$tempfile $tempfile`.
-*   `watch:scripts:watch-source-map` relies on [Stephen Belanger]
+*   `watch:scripts:watch-source-map` relies on [Qard]
     (https://github.com/Qard)'s [onchange]
     (https://github.com/Qard/onchange) package (unstable, currently
     0.0.2) to listen for changes to `$tempfile`. It issues two commands:
-    
+
     1.  `touch $tempfile;`, to make sure there is something to watch.
     2.  `onchange $tempfile -- npm run watch:scripts:extract-source-map`
     3.  `watch:scripts:extract-source-map` then redirects `$tempfile` to
@@ -108,6 +108,8 @@ like this:
     If I attempt to inline step 3 into 2 here, it breaks -- exorcist
     will complain that it was handed a file without a source map, and
     write an empty bundle.js. It seems like some kind of race condition?
+    Is it catching `$tempfile` with its pants down in between an `rm`
+    and an `mv`?
 
 So, I'm starting to get a feel for the complexities, at least. This all
 works for the moment, and at least I understand each step fairly
@@ -115,3 +117,31 @@ clearly. The use of onchange to hold together watchify and exorcise
 feels very janky to me. I wonder if it's hearing a subtly wrong file
 system event? I have to say that this all makes gulp's streaming i/o and
 use of watchify's javascript API seem fairly compelling.
+
+ * * *
+
+And back to gulp. It's so fast! And yes there is this sense that
+browserify wants to use its own plugins and vinyl-transform is going all
+"but what about me"? And I don't at all understand what these lines do
+
+```javascript
+return stream.pipe(source('bundle.js'))
+           // optional, remove if you dont want sourcemaps
+             .pipe(buffer())
+           // loads map from browserify file
+             .pipe(sourcemaps.init({loadMaps: true}))
+           // writes .map file
+             .pipe(sourcemaps.write('./'))
+           //
+             .pipe(gulp.dest('./build'));
+```
+
+but the important thing is that _I might some day_, and it works right
+now. Current problems:
+
+*   Source maps are broken (reactify [issue #19](https://github.com/andreypopp/reactify/issues/19))
+*   How do I use the ES6 transformer? Matt Greer's [notes]
+    (http://www.mattgreer.org/articles/traceur-gulp-browserify-es6/) are
+    promising.
+    *   [ButuzGOL](https://github.com/ButuzGOL) [saves the day]
+        (https://github.com/DragonLegend/game/blob/master/public/gulpfile.js#L127)!
