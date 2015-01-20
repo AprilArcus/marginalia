@@ -77,16 +77,19 @@ like this:
     between browserify (`npm run build:scripts`) and watchify (`npm run
     watch:scripts`)
 *   `build:scripts:extract-source-map` expects to receive a browserify
-    bundle with a sourcemap via stdin. It relies on @thlorenz 's
-    [exorcist](https://github.com/thlorenz/exorcist) package (unstable,
-    currently 0.1.6).
+    bundle with a sourcemap via stdin. It relies on [Thorsten Lorenz]
+    (https://github.com/thlorenz)'s [exorcist]
+    (https://github.com/thlorenz/exorcist) package (unstable, currently
+    0.1.6).
 *   `build:scripts` shells to `build:scripts:browserify` with
     `--loglevel=silent` so that the bundled JS goes to stdout, and
-    pipes to `build:scripts:extract-source-map` (this is @smikes '
+    pipes to `build:scripts:extract-source-map` (this is [smikes]
+    (https://github.com/npm/npm/issues/6710#issuecomment-63105711)'s
     [workaround](https://github.com/npm/npm/issues/6710#issuecomment-63105711)
     for the npm script runner's mutation of stdout)
 *   Watchify can't pipe to exorcist since it has no useful stdout, so I
-    use @substack's [method](https://github.com/substack/watchify/issues/16#issuecomment-67732434)
+    use [James Halliday](https://github.com/substack/)'s [method]
+    (https://github.com/substack/watchify/issues/16#issuecomment-67732434)
     of writing to a tempfile. Since I refer to this path in three
     different scripts, I store it as
     `$npm_package_config_bundle_js_tmp_path`.
