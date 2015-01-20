@@ -95,7 +95,8 @@ like this:
     `$npm_package_config_bundle_js_tmp_path`.
 *   Empirically, watchify seems to stream its bundle into `.$tempfile`,
     then `rm $tempfile` and `mv .$tempfile $tempfile`.
-*   `watch:scripts:watch-source-map` relies on @Qard 's [onchange]
+*   `watch:scripts:watch-source-map` relies on [Stephen Belanger]
+    (https://github.com/Qard)'s [onchange]
     (https://github.com/Qard/onchange) package (unstable, currently
     0.0.2) to listen for changes to `$tempfile`. It issues two commands:
     1.  `touch $tempfile;`, to make sure there is something to watch.
