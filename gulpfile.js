@@ -79,20 +79,23 @@ gulp.task('clean:scripts', function(callback) {
         callback);
 });
 
-gulp.task('build:markup', function() {
+// we need to ensure build/index.html exists before we can watch it
+// c.f. "Running tasks in series, i.e. Task Dependency"
+// https://github.com/gulpjs/gulp/blob/master/docs/recipes/running-tasks-in-series.md
+
+gulp.task('build:markup', function(callback) {
     gulp.src(config.indexHTML)
         .pipe(gulp.dest('build'));
+    callback();
 });
 
-gulp.task('watch:markup', function() {
+gulp.task('watch:markup', ['build:markup'], function() {
     gulp.watch(config.indexHTML, ['build:markup']);
 });
 
 gulp.task('clean:markup', function(callback) {
     del(['build/index.html'], callback);
 });
-
-
 
 gulp.task('build', ['build:scripts', 'build:markup']);
 gulp.task('watch', ['watch:scripts', 'watch:markup']);
