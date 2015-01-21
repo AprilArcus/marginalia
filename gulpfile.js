@@ -1,5 +1,6 @@
 'use strict';
 
+var _ = require('lodash');
 var gulp = require('gulp');
 var source = require('vinyl-source-stream');
 var buffer = require('vinyl-buffer');
@@ -30,47 +31,53 @@ function handleError(task) {
   };
 }
 
-// How to keep a fast build with Browserify and ReactJS
+// h/t Mitchel Kuijpers (@mitchelkuijpers)
+// "How to keep a fast build with Browserify and ReactJS"
 // http://blog.avisi.nl/2014/04/25/how-to-keep-a-fast-build-with-browserify-and-reactjs/
+// and Trần Xuân Trường (@mr_truong_tx)
+// "Using Watchify with Gulp for fast Browserify build"
+// http://truongtx.me/2014/08/06/using-watchify-with-gulp-for-fast-browserify-build/
 
-var scripts = function(opts) {
-    console.log('initializing browserify');
-    var bundler = browserify(config.entryJS, {
-        debug: !production,
-        cache: {},            // required for watchify
-        packageCache: {},     // required for watchify
-        fullPaths: opts.watch // required to be true only for watchify
-    });
+var bundleScripts = function(options) {
+    var bundler = browserify(
+        _.extend({debug: !production}, watchify.args)
+    );
+    bundler.add(config.entryJS);
     bundler.transform(to5ify);
-    if (production) {
+    // if (production) {
         bundler.transform(uglifyify, {global: true});
-    }
-    if (opts.watch) {
-        bundler = watchify(bundler);
-    }
-    var rebundle = function() {
-        var stream = bundler.bundle();
-        stream.on('error', handleError('Browserify'));
-        return stream.pipe(source(config.outputJS))
-                   // optional, remove if you dont want sourcemaps
-                     .pipe(buffer())
-                   // loads map from browserify file
-                     .pipe(sourcemaps.init({loadMaps: true}))
-                   // writes .map file
-                     .pipe(sourcemaps.write('./'))
-                   // https://github.com/gulpjs/gulp/blob/master/docs/recipes/
-                     .pipe(gulp.dest(config.buildDir));
+    // }
+
+    var writeBundledScripts = function(browserifyObject) {
+        browserifyObject.bundle()
+                        .on('error', handleError('Browserify'))
+                        .pipe(source(config.outputJS))
+                      // gulp-sourcemaps
+                      // https://github.com/gulpjs/gulp/blob/master/docs/recipes/fast-browserify-builds-with-watchify.md
+                        .pipe(buffer())
+                      // load map from browserify file
+                        .pipe(sourcemaps.init({loadMaps: true}))
+                      // write .map file
+                        .pipe(sourcemaps.write('./'))
+                        .pipe(gulp.dest(config.buildDir));
     };
-    bundler.on('update', rebundle);
-    return rebundle();
+
+    if (options.watch) {
+        bundler = watchify(bundler);
+        bundler.on('update', function() {
+            writeBundledScripts(bundler)
+        });
+    }
+
+    writeBundledScripts(bundler);
 };
 
 gulp.task('build:scripts', function() {
-    return scripts({watch: false});
+    return bundleScripts({watch: false});
 });
 
 gulp.task('watch:scripts', function() {
-    return scripts({watch: true});
+    return bundleScripts({watch: true});
 });
 
 gulp.task('clean:scripts', function(callback) {

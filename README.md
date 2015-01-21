@@ -4,10 +4,9 @@ Experiments with React & Gulp
 15 Jan 2015
 -----------
 
-* Set up development environment in gulp with help of [Joe Maddalone]
-(https://github.com/joemaddalone)'s [screencast][joemaddalone1].
-
-[joemaddalone1]: https://egghead.io/lessons/react-development-environment-setup
+*   Set up development environment in gulp with help of [Joe Maddalone]
+    (https://github.com/joemaddalone)'s [screencast]
+    (https://egghead.io/lessons/react-development-environment-setup)
 
 ```shell
 npm install --global gulp
@@ -15,7 +14,7 @@ npm install --save-dev gulp gulp-browserify gulp-concat
 npm install react reactify
 ```
 
-* basic flux source tree
+*    basic flux source tree
 
 ```
 /marginalia
@@ -34,29 +33,87 @@ npm install react reactify
 16 Jan 2015
 -----------
 
-* Improving build system by migrating from gulp-browserify to real gulp
-  commands
-* These resources have been helpful:
-  * https://medium.com/@sogko/gulp-browserify-the-gulp-y-way-bb359b3f9623
-  * https://github.com/gulpjs/gulp/blob/master/docs/recipes/fast-browserify-builds-with-watchify.md
-  * http://blog.avisi.nl/2014/04/25/how-to-keep-a-fast-build-with-browserify-and-reactjs/
-  * http://truongtx.me/2014/08/06/using-watchify-with-gulp-for-fast-browserify-build/
-  * https://hacks.mozilla.org/2014/08/browserify-and-gulp-with-react/
-  * http://christianalfoni.github.io/javascript/2014/08/15/react-js-workflow.html
-  * http://christianalfoni.github.io/javascript/2014/10/30/react-js-workflow-part2.html
+Spent today improving the build system by migrating from gulp-browserify
+to real gulp commands.
+
+> The main _browserify_ library has enough [open issues]
+> (https://github.com/substack/node-browserify/issues) at the moment (61
+> open issues as of 14 Aug 2014) that it makes hard to guarantee that
+> [a] gulp plugin that is a wrapper around _browserify_ will always be
+> up-to-date.
+>
+> In fact, since 13 March 2014, the maintainer of _gulp-browserify_ has
+> [stopped updating the codebase]
+> (https://github.com/deepak1556/gulp-browserify/commits/master) after
+> being [blacklisted by gulpjs]
+> (https://github.com/gulpjs/plugins/issues/47).
+>
+> — [Hafiz Ismail](http://about.me/hafiz.ismail) ([@sogko]
+>   (https://twitter.com/sogko)), [gulp + browserify, the gulp-y way]
+>   (https://medium.com/@sogko/gulp-browserify-the-gulp-y-way-bb359b3f9623)
+
+Hafiz uses a technique of wrapping browserify inside a vinyl-transform,
+which he argues is superior to a vinyl-source-stream, since it allows
+him to run browserify on a glob of multiple files simultaneously. This
+will be good to keep in mind if I end up with multiple index pages,
+each with their own bundle of react components (an easily foreseeable
+scenario w/r/t Claire's portfolio!)
+
+I ultimately opted to go with Mitchel Kuijpers' [solution](http://blog.avisi.nl/2014/04/25/how-to-keep-a-fast-build-with-browserify-and-reactjs/),
+and graft it to [this recipe](https://github.com/gulpjs/gulp/blob/master/docs/recipes/fast-browserify-builds-with-watchify.md)'s
+technique for extracting source maps using a vinyl buffer. I also
+referenced [Trần Xuân Trường](http://truongtx.me/about.html)
+([@mr_truong_tx](https://twitter.com/mr_truong_tx))'s [implementation]
+(http://truongtx.me/2014/08/06/using-watchify-with-gulp-for-fast-browserify-build/)
+in de-babelizing Mitchel's over-clever technique of storing the
+browserify object in a closure.
+
+These resources were also helpful:
+
+*   [Browserify and Gulp with React]
+    (https://hacks.mozilla.org/2014/08/browserify-and-gulp-with-react/),
+    by [Kevin Ngo](http://ngokevin.com) ([@ngokevin\_]
+    (https://twitter.com/ngokevin_)) and [Robert Nyman]
+    (http://robertnyman.com) ([@robertnyman]
+    (https://twitter.com/robertnyman))
+*   React JS and a browserify workflow, [Part 1]
+    (http://christianalfoni.github.io/javascript/2014/08/15/react-js-workflow.html)
+    and [Part 2]
+    (http://christianalfoni.github.io/javascript/2014/10/30/react-js-workflow-part2.html)
+    by [Christian Alfoni](http://christianalfoni.github.io) 
+    ([@christianalfoni](https://twitter.com/christianalfoni))
+
+Trường, Christian and others argue compellingly that the _matryoshka_
+effect of running watchify inside gulp is worth it for hitting the sweet
+spot of power and performance. Unfortunately, their clear writing and
+lived experience was not enough to keep me from spending Sunday and
+Monday chasing down the rabbit hole of re-implementing all this in
+pidgin shell.
 
 18 Jan 2015
 -----------
 
-https://twitter.com/ddprrt/status/529909875347030016
-
-<blockquote class="twitter-tweet" lang="en"><p>&quot;What&#39;s bower?&quot;&#10;&quot;A package manager, install it with npm.&quot;&#10;&quot;What&#39;s npm?&quot;&#10;&quot;A package manager, you can install it with brew&quot;&#10;&quot;What&#39;s brew?&quot;&#10;...</p>&mdash; Stefan Baumgartner (@ddprrt) <a href="https://twitter.com/ddprrt/status/529909875347030016">November 5, 2014</a></blockquote> <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+> "What's bower?"  
+> "A package manager, install it with npm."  
+> "What's npm?"  
+> "A package manager, you can install it with brew"  
+> "What's brew?"
+>
+> — [Stefan Baumgartner](http://fettblog.eu) ([@ddprrt]
+>   (https://twitter.com/ddprrt)) [November 5, 2014]
+>   (https://twitter.com/ddprrt/status/529909875347030016)
 
 Thinking harder about this.
 
-* http://substack.net/task_automation_with_npm_run
-* http://blog.keithcirkel.co.uk/why-we-should-stop-using-grunt/
-* http://blog.keithcirkel.co.uk/how-to-use-npm-as-a-build-tool/
+*   [task automation with npm run](http://substack.net/task_automation_with_npm_run)
+    by [James Halliday](http://substack.net/) ([@substack]
+    (https://twitter.com/substack))
+*   [Why we should stop using Grunt & Gulp]
+    (http://blog.keithcirkel.co.uk/why-we-should-stop-using-grunt/)
+    and [How to Use npm as a Build Tool]
+    (http://blog.keithcirkel.co.uk/how-to-use-npm-as-a-build-tool/) by
+    [Keith Cirkel](http://blog.keithcirkel.co.uk) ([@Keithamus]
+    (https://twitter.com/keithamus))
 
 What do I really need my build system to do?
 
@@ -118,7 +175,7 @@ feels very janky to me. I wonder if it's hearing a subtly wrong file
 system event? I have to say that this all makes gulp's streaming i/o and
 use of watchify's javascript API seem fairly compelling.
 
- * * *
+------------------------------------------------------------------------
 
 And back to gulp. It's so fast! And yes there is this sense that
 browserify wants to use its own plugins and vinyl-transform is going all
@@ -145,3 +202,52 @@ now. Current problems:
     promising.
     *   [ButuzGOL](https://github.com/ButuzGOL) [saves the day]
         (https://github.com/DragonLegend/game/blob/master/public/gulpfile.js#L127)!
+
+20 Jan 2015
+-----------
+
+I spent the night reading reactify's source code, and it appears to be
+entirely bypassing react-tools and issuing calls to directly to
+jstransform (react-tools' backing library). This means a quick patch for
+issue #19 is probably beyond me. I considered rewriting my own
+react-tools browserify plugin in the image of [coffeeify]
+(https://github.com/jnordberg/coffeeify) (a comparatively terse little
+code poem), but I eventually decided to switch to [6to5]
+(https://6to5.org), which parses JSX perfectly well, strips the
+flow/typescript annotations I intend to use, worships at the Church of
+the Sensible Default, and has better ES6 support than react-tools. I 
+encountered this caveat in browserify/6to5ify, however:
+
+```javascript
+    var bundler = browserify(config.entryJS, {
+        debug: !production,
+        transform: [to5ify] // compiles, but no source maps
+    });
+```
+
+```javascript
+    var bundler = browserify(config.entryJS, {
+        debug: !production,
+    });
+    bundler.transform(to5ify); // works
+```
+
+I've been through browserify's sources and I can't account for it, which
+is frustrating but ultimately moot.
+
+Spent a couple more hours cleaning up my gulpfile and making sure I
+understood everything, and updated my 16 Jan 2015 entry.
+
+Next up: live-reload! Implemented in
+
+*   [es6-6to5-browserify-boilerplate/gulpfile.js]
+    (https://github.com/thoughtram/es6-6to5-browserify-boilerplate/blob/master/gulpfile.js) by [Christoph Burgdorf]
+    (https://cburgdorf.wordpress.com)
+*   [Using Watchify with Gulp for fast Browserify build]
+    (http://truongtx.me/2014/08/06/using-watchify-with-gulp-for-fast-browserify-build/)
+    by [Trần Xuân Trường](http://truongtx.me/about.html)
+    ([@mr_truong_tx](https://twitter.com/mr_truong_tx)) 
+*   [React JS and a browserify workflow, Part 2]
+    (http://christianalfoni.github.io/javascript/2014/10/30/react-js-workflow-part2.html)
+    by [Christian Alfoni](http://christianalfoni.github.io) 
+    ([@christianalfoni](https://twitter.com/christianalfoni))

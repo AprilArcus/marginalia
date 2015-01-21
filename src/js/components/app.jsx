@@ -1,8 +1,9 @@
-var React = require('react');
+// var React = require('react'); // commonjs
+import React from 'react';       // es6
 
-module.exports = React.createClass({
+// module.exports = React.createClass({ // commonjs
+export default React.createClass({      // es6
     render: function() {
-        var reflect = value => value;
-        return <h1>Get fluxy in /js/components/app.js</h1>
+        return <h1>Get fluxxxy in /js/components/app.js</h1>
     }
 })
