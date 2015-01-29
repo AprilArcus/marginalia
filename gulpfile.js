@@ -12,6 +12,7 @@ var notify = require('gulp-notify');
 var browserify = require('browserify');
 var watchify = require('watchify');
 var to5ify = require("6to5ify");
+var envify = require("envify");
 var uglifyify = require('uglifyify');
 var sourcemaps = require('gulp-sourcemaps');
 
@@ -43,33 +44,34 @@ var bundleScripts = function(options) {
         _.extend({debug: !production}, watchify.args)
     );
     bundler.add(config.entryJS);
-    bundler.transform(to5ify);
+    bundler.transform(to5ify.configure({
+        // loose: 'all' // http://6to5.org/docs/usage/loose/
+    }));
+    bundler.transform(envify);
     // if (production) {
         bundler.transform(uglifyify, {global: true});
     // }
 
-    var writeBundledScripts = function(browserifyObject) {
-        browserifyObject.bundle()
-                        .on('error', handleError('Browserify'))
-                        .pipe(source(config.outputJS))
-                      // gulp-sourcemaps
-                      // https://github.com/gulpjs/gulp/blob/master/docs/recipes/fast-browserify-builds-with-watchify.md
-                        .pipe(buffer())
-                      // load map from browserify file
-                        .pipe(sourcemaps.init({loadMaps: true}))
-                      // write .map file
-                        .pipe(sourcemaps.write('./'))
-                        .pipe(gulp.dest(config.buildDir));
+    var writeBundledScripts = function() {
+        bundler.bundle()
+               .on('error', handleError('Browserify'))
+               .pipe(source(config.outputJS))
+             // gulp-sourcemaps
+             // https://github.com/gulpjs/gulp/blob/master/docs/recipes/fast-browserify-builds-with-watchify.md
+               .pipe(buffer())
+             // load map from browserify file
+               .pipe(sourcemaps.init({loadMaps: true}))
+             // write .map file
+               .pipe(sourcemaps.write('./'))
+               .pipe(gulp.dest(config.buildDir));
     };
 
     if (options.watch) {
         bundler = watchify(bundler);
-        bundler.on('update', function() {
-            writeBundledScripts(bundler)
-        });
+        bundler.on('update', writeBundledScripts);
     }
 
-    writeBundledScripts(bundler);
+    writeBundledScripts();
 };
 
 gulp.task('build:scripts', function() {

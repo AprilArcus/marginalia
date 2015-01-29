@@ -7,14 +7,11 @@
     "bundle_js_tmp_path": "tmp/bundle.js.tmp"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build:scripts": "npm run build:scripts:browserify --loglevel=silent | npm run build:scripts:extract-source-map",
-    "build:scripts:browserify": "browserify $npm_package_config_browserify_args",
-    "build:scripts:extract-source-map": "exorcist build/bundle.js.map > build/bundle.js",
-    "watch:scripts": "npm run watch:scripts:watchify & npm run watch:scripts:watch-source-map",
-    "watch:scripts:watchify": "watchify $npm_package_config_browserify_args -v --outfile $npm_package_config_bundle_js_tmp_path",
-    "watch:scripts:watch-source-map": "touch $npm_package_config_bundle_js_tmp_path; onchange $npm_package_config_bundle_js_tmp_path -- npm run watch:scripts:extract-source-map",
-    "watch:scripts:extract-source-map": "< $npm_package_config_bundle_js_tmp_path npm run build:scripts:extract-source-map"
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "jshintConfig": {
+    "node": true,
+    "esnext": true
   },
   "repository": {
     "type": "git",

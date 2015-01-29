@@ -65,8 +65,8 @@ technique for extracting source maps using a vinyl buffer. I also
 referenced [Trần Xuân Trường](http://truongtx.me/about.html)
 ([@mr_truong_tx](https://twitter.com/mr_truong_tx))'s [implementation]
 (http://truongtx.me/2014/08/06/using-watchify-with-gulp-for-fast-browserify-build/)
-in de-babelizing Mitchel's over-clever technique of storing the
-browserify object in a closure.
+as I vascillated on Mitchel clever-but-maybe-too-clever? technique of 
+storing the browserify object in a closure.
 
 These resources were also helpful:
 
@@ -240,14 +240,124 @@ understood everything, and updated my 16 Jan 2015 entry.
 
 Next up: live-reload! Implemented in
 
+*   [Server with live-reloading and CSS injection]
+    (https://github.com/gulpjs/gulp/blob/master/docs/recipes/server-with-livereload-and-css-injection.md) using browser-sync
 *   [es6-6to5-browserify-boilerplate/gulpfile.js]
     (https://github.com/thoughtram/es6-6to5-browserify-boilerplate/blob/master/gulpfile.js) by [Christoph Burgdorf]
-    (https://cburgdorf.wordpress.com)
+    (https://cburgdorf.wordpress.com) using browser-sync
 *   [Using Watchify with Gulp for fast Browserify build]
-    (http://truongtx.me/2014/08/06/using-watchify-with-gulp-for-fast-browserify-build/)
+    (http://truongtx.me/2014/08/06/using-watchify-with-gulp-for-fast-browserify-build/) using gulp-livereload
     by [Trần Xuân Trường](http://truongtx.me/about.html)
     ([@mr_truong_tx](https://twitter.com/mr_truong_tx)) 
 *   [React JS and a browserify workflow, Part 2]
     (http://christianalfoni.github.io/javascript/2014/10/30/react-js-workflow-part2.html)
     by [Christian Alfoni](http://christianalfoni.github.io) 
-    ([@christianalfoni](https://twitter.com/christianalfoni))
+    ([@christianalfoni](https://twitter.com/christianalfoni)) using
+    gulp-livereload
+
+It seems like there are two games in town:
+
+*   [LiveReload](http://livereload.com)
+*   [BrowserSync](http://www.browsersync.io)
+
+Choices, choices. LiveReload is [closed-source]
+(http://tarantsov.com/blog/2012/02/the-third-definition-of-open/),
+and seems like it wants to be yet another master hub/build system.
+
+Mitchel Kuipers is [back]
+(http://blog.avisi.nl/2014/04/10/why-you-should-use-browsersync/) with
+an endorsement for BrowserSync (having used both), so I suppose that's
+where we'll begin.
+
+21 Jan 2015
+-----------
+
+Editor setup!
+
+Sublime + Package Control
+=========================
+
+`npm install -g jshint`
+`npm install -g jsxhint`
+package controll install JavaScriptNext - ES6 Syntax
+package controll install 6to5
+package controll install SublimeLinter-jsxhint
+
+Vim + Pathogen
+==============
+
+```shell
+# get the latest vim
+brew install vim
+# install pathogen
+mkdir -p ~/.vim/autoload ~/.vim/bundle
+curl -LSso ~/.vim/autoload/pathogen.vim https://raw.githubusercontent.com/tpope/vim-pathogen/master/autoload/pathogen.vim
+# prepend this line to .vimrc:
+execute pathogen#infect()
+# install packages
+cd ~/.vim/bundle
+# solarized
+git clone git://github.com/altercation/vim-colors-solarized.git
+```
+
+# better js and jsx syntax definitions
+git clone https://github.com/pangloss/vim-javascript.git
+git clone https://github.com/mxw/vim-jsx.git
+
+> To set [6to5-sublime] as the default syntax for a particular extension:
+
+> Open a file with that extension,
+> Select View from the menu,
+> Then Syntax -> Open all with current extension as... -> JavaScript 6to5.
+> Repeat this for each extension (e.g.: .js and .jsx).
+
+linter settings in `package.json`. Should probably be broken out into
+separate `.jshintrc` files for es5 code (gulpfile.js), es6 code (flux
+source files), and jsx code (react components).
+
+```JSON
+"jshintConfig": {
+  "node": true,
+  "esnext": true
+},
+```
+
+Note: syntax highlighting in 6to5-sublime doesn't like javascript specials
+inside JSX text nodes. Filed [an issue](https://github.com/6to5/6to5-sublime/issues/14).
+
+Packages to think about:
+
+sugar.js
+XRegExp
+lodash
+
+26 Jan 2015
+-----------
+
+The quest for italics in iTerm2 / vim
+
+# italics (https://alexpearce.me/2014/05/italics-in-iterm2-vim-tmux/)
+curl https://gist.githubusercontent.com/sos4nt/3187620/raw/8e13c1fec5b72d415ed2917590348451de5f8e58/xterm-256color-italic.terminfo -o /tmp/xterm-256color-italic.terminfo
+tic /tmp/xterm-256color-italic.terminfo
+
+< /tmp/xterm-256color-italic.terminfo sed s/xterm/screen/g > /tmp/screen-256color-italic.terminfo
+tic /tmp/screen-256color-italic.terminfo
+
+# append to bash profile
+export TERM='xterm-256color-italic'
+# append to tmux.conf
+set -g default-terminal "screen-256color-italic"
+
+# Opened a pull request on Solarized. Use
+cd ~/.vim/bundle
+git clone git@github.com:AprilArcus/vim-colors-solarized.git
+# for now. c.f. https://github.com/altercation/solarized/issues/311
+
+TODO in vimland: syntastic, gitgutter?
+
+28 Jan 2015
+-----------
+
+Vim is a horrible rabbit hole. Back to the build system! What's left?
+* flow
+* browser-sync
