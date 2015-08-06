@@ -6,19 +6,28 @@ var app = koa();
 // database connection
 import koaPg from 'koa-pg';
 import { prod } from './database';
+
 app.use(koaPg(
 	`postgres://${prod.user}:${prod.password}@` +
 	`${prod.host}:${prod.port}/${prod.database}`
 ));
-app.use(function * (next) {
-	console.log(this.pg);
-	yield next;
-});
 
 // sessions
-import session from './session';
 app.keys = [`our-session-secret`];
-app.use(session);
+import genericSession from 'koa-generic-session';
+import PgStore from 'koa-pg-session';
+var session = genericSession({
+	store: new PgStore(prod, {
+		schema: `public`,
+		table: `sessions`,
+		create: false,
+		cleanupTime: 2700000 // ms, === 45 min
+	})
+});
+app.use(function * (next) {
+	console.log(this.pg);
+	yield session.call(this, next);
+});
 
 // body parser
 import bodyParser from 'koa-bodyparser';
@@ -60,7 +69,6 @@ routes.public.get(`/login`, function * (next) {
 });
 
 routes.public.post(`/login`, function * (next) {
-	console.log(this.pg);
 	yield passport.authenticate(strategies.local.name, {
 		successRedirect: `/app`,
 		failureRedirect: `/`
