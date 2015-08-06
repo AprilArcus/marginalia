@@ -6,27 +6,29 @@ var app = koa();
 // database connection
 import koaPg from 'koa-pg';
 import { prod } from './database';
-
-app.use(koaPg(
-	`postgres://${prod.user}:${prod.password}@` +
+app.use(koaPg({
+	name: `db`,
+	conStr: `postgres://${prod.user}:${prod.password}@` +
 	`${prod.host}:${prod.port}/${prod.database}`
-));
+}));
 
 // sessions
 app.keys = [`our-session-secret`];
 import genericSession from 'koa-generic-session';
 import PgStore from 'koa-pg-session';
-var session = genericSession({
-	store: new PgStore(prod, {
-		schema: `public`,
-		table: `sessions`,
-		create: false,
-		cleanupTime: 2700000 // ms, === 45 min
-	})
-});
 app.use(function * (next) {
-	console.log(this.pg);
-	yield session.call(this, next);
+	yield genericSession({
+		store: new PgStore(
+			// Reuse koa-pg's co-pg client pool. Replace this with a database.json type connection specification if we ever relocate the sessions table to its own machine
+			this.pg.db,
+			{
+				schema: `public`,
+				table: `sessions`,
+				create: false,
+				cleanupTime: 2700000 // ms, === 45 min
+			}
+		)
+	}).call(this, next);
 });
 
 // body parser
