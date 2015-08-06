@@ -1,4 +1,4 @@
 node_modules
-build/*
-tmp/*
 database.json
+.DS_Store
+*.log
