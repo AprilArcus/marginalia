@@ -3,6 +3,18 @@
 import koa from 'koa';
 var app = koa();
 
+// database connection
+import koaPg from 'koa-pg';
+import { prod } from './database';
+app.use(koaPg(
+	`postgres://${prod.user}:${prod.password}@` +
+	`${prod.host}:${prod.port}/${prod.database}`
+));
+app.use(function * (next) {
+	console.log(this.pg);
+	yield next;
+});
+
 // sessions
 import session from './session';
 app.keys = [`our-session-secret`];
@@ -18,7 +30,7 @@ import {
 	serializeUserCallback,
 	deserializeUserCallback,
 	strategies
-} from './authentication';
+} from './auth';
 passport.serializeUser(serializeUserCallback);
 passport.deserializeUser(deserializeUserCallback);
 Object.values(strategies).forEach(strategy => passport.use(strategy));
@@ -40,15 +52,20 @@ var routes = {
 };
 
 routes.public.get(`/`, function * (next) {
+	this.redirect(this.isAuthenticated() ? `/app` : `/login`);
+});
+
+routes.public.get(`/login`, function * (next) {
 	this.body = yield this.render(`login`);
 });
 
-routes.public.post(`/login`,
-	passport.authenticate(strategies.local.name, {
+routes.public.post(`/login`, function * (next) {
+	console.log(this.pg);
+	yield passport.authenticate(strategies.local.name, {
 		successRedirect: `/app`,
 		failureRedirect: `/`
-	})
-);
+	});
+});
 
 routes.private.get(`/logout`, function * (next) {
 	this.logout();

@@ -1,6 +1,5 @@
 /* @flow */
 
-// authentication
 var testUser = { id: 1, username: `test` };
 
 export function serializeUserCallback(user: {id: number}, done: Function) {
