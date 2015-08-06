@@ -1,13 +1,18 @@
 /* @flow */
 
+import passport from 'koa-passport';
+// export { initialize, session } from 'koa-passport';
+
 var testUser = { id: 1, username: `test` };
 
-export function serializeUserCallback(user: {id: number}, done: Function) {
+function serializeUserCallback(user: {id: number}, done: Function) {
 	done(null, user.id);
 }
-export function deserializeUserCallback(id: number, done: Function) {
+function deserializeUserCallback(id: number, done: Function) {
 	done(null, testUser);
 }
+passport.serializeUser(serializeUserCallback);
+passport.deserializeUser(deserializeUserCallback);
 
 import { Strategy as LocalStrategy } from 'passport-local';
 function currentUser(username, password) {
@@ -54,3 +59,15 @@ export var strategies = {
 	// 	(token, tokenSecret, profile, done) => done(null, testUser)
 	// );
 };
+
+Object.values(strategies).forEach(strategy => passport.use(strategy));
+
+export function authenticateWithLocalStrategy(
+	{ successRedirect, failureRedirect }:
+	{ successRedirect: string, failureRedirect: string } = {}
+) {
+	return passport.authenticate(
+		strategies.local.name,
+		{ successRedirect, failureRedirect }
+	);
+}

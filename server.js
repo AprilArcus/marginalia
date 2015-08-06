@@ -6,11 +6,10 @@ var app = koa();
 // database connection
 import koaPg from 'koa-pg';
 import { prod } from './database';
-app.use(koaPg({
-	name: `db`,
-	conStr: `postgres://${prod.user}:${prod.password}@` +
-	`${prod.host}:${prod.port}/${prod.database}`
-}));
+function conStr({ user, password, host, port, database }) {
+	return `postgres://${user}:${password}@${host}:${port}/${database}`;
+}
+app.use(koaPg({ name: `db`, conStr: conStr(prod) }));
 
 // sessions
 app.keys = [`our-session-secret`];
@@ -24,13 +23,10 @@ app.use(bodyParser());
 // authentication
 import passport from 'koa-passport';
 import {
-	serializeUserCallback,
-	deserializeUserCallback,
-	strategies
+	// initialize as passportInitialize,
+	// session as passportSession,
+	authenticateWithLocalStrategy
 } from './auth';
-passport.serializeUser(serializeUserCallback);
-passport.deserializeUser(deserializeUserCallback);
-Object.values(strategies).forEach(strategy => passport.use(strategy));
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -57,7 +53,7 @@ routes.public.get(`/login`, function * (next) {
 });
 
 routes.public.post(`/login`, function * (next) {
-	yield passport.authenticate(strategies.local.name, {
+	yield authenticateWithLocalStrategy({
 		successRedirect: `/app`,
 		failureRedirect: `/`
 	});
