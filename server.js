@@ -3,10 +3,33 @@
 import koa from 'koa';
 var app = koa();
 
+// database connection
+import koaPg from 'koa-pg';
+import { prod } from './database';
+app.use(koaPg({
+	name: `db`,
+	conStr: `postgres://${prod.user}:${prod.password}@` +
+	`${prod.host}:${prod.port}/${prod.database}`
+}));
+
 // sessions
-import session from './session';
 app.keys = [`our-session-secret`];
-app.use(session);
+import genericSession from 'koa-generic-session';
+import PgStore from 'koa-pg-session';
+app.use(function * (next) {
+	yield genericSession({
+		store: new PgStore(
+			// Reuse koa-pg's co-pg client pool. Replace this with a database.json type connection specification if we ever relocate the sessions table to its own machine
+			this.pg.db,
+			{
+				schema: `public`,
+				table: `sessions`,
+				create: false,
+				cleanupTime: 2700000 // ms, === 45 min
+			}
+		)
+	}).call(this, next);
+});
 
 // body parser
 import bodyParser from 'koa-bodyparser';
@@ -18,7 +41,7 @@ import {
 	serializeUserCallback,
 	deserializeUserCallback,
 	strategies
-} from './authentication';
+} from './auth';
 passport.serializeUser(serializeUserCallback);
 passport.deserializeUser(deserializeUserCallback);
 Object.values(strategies).forEach(strategy => passport.use(strategy));
@@ -40,15 +63,19 @@ var routes = {
 };
 
 routes.public.get(`/`, function * (next) {
+	this.redirect(this.isAuthenticated() ? `/app` : `/login`);
+});
+
+routes.public.get(`/login`, function * (next) {
 	this.body = yield this.render(`login`);
 });
 
-routes.public.post(`/login`,
-	passport.authenticate(strategies.local.name, {
+routes.public.post(`/login`, function * (next) {
+	yield passport.authenticate(strategies.local.name, {
 		successRedirect: `/app`,
 		failureRedirect: `/`
-	})
-);
+	});
+});
 
 routes.private.get(`/logout`, function * (next) {
 	this.logout();
